@@ -98,7 +98,8 @@ public class Task {
 		System.out.printf(format, "3.", "  Delete task");
 		System.out.printf(format, "4.", "  Mark task complete");
 		System.out.printf(format, "5.", "  Search task list");
-		System.out.printf(format, "6.", "  Quit");
+		System.out.printf(format, "6.", "  Edit a task");
+		System.out.printf(format, "7.", "  Quit");
 		System.out.println("");
 		System.out.println("");
 
@@ -137,13 +138,23 @@ public class Task {
 				userEntry = sc.nextInt();
 			}
 			if (choice == true) {
-				System.out.println(list.get(userEntry - 1));
-				System.out.print("Are you sure you want to mark this task complete? (y/n): ");
-				String userConfirm = sc.next();
-				if (userConfirm.equals("y")) {
-					list.get(userEntry - 1).setTaskComplete();
-				} else {
+				if (list.get(userEntry - 1).isTaskComplete() == true) {
+					System.out.println("Entry is already completed!");
+					System.out.println("");
+				}else {
+					System.out.println(list.get(userEntry - 1));
+					System.out.print("Are you sure you want to mark this task complete? (y/n): ");
+					String userConfirm = sc.next();
+					if (userConfirm.equals("y")) {
+						list.get(userEntry - 1).setTaskComplete();
+						System.out.println("");
+						System.out.println("");
+						System.out.println("");
+						System.out.println("Task set to complete!");
+						System.out.println("");
+					} else {
 
+					}
 				}
 			} else {
 				System.out.println(list.get(userEntry - 1));
@@ -151,9 +162,16 @@ public class Task {
 				String userConfirm = sc.next();
 				if (userConfirm.equals("y")) {
 					list.remove(userEntry - 1);
+					System.out.println("");
+					System.out.println("");
+					System.out.println("");
+					System.out.println("Task removed!");
+					System.out.println("");
 				} else {
 
 				}
+				// garbage line
+				sc.nextLine();
 			}
 
 		}
@@ -178,7 +196,7 @@ public class Task {
 				System.out.print("What name would you like to search for? ");
 				name = sc.next();
 				for (int i = 0; i < list.size(); i++) {
-					if (list.get(i).getMemberName().equalsIgnoreCase(name)) {
+					if (list.get(i).getMemberName().contains(name)) {
 						searchResults += list.get(i) + "\n";
 					} else {
 						continue;
@@ -218,6 +236,72 @@ public class Task {
 			}
 		}
 	}
+	
+	public void editTask(LinkedList<Task> list, Scanner sc, String prompt) {
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		if(list.isEmpty()) {
+			System.out.println("There are no tasks to edit. ");
+		}else {
+			listTasks(list, false);
+			int userEntry = Validator.getInt(sc, "Select the task number of the task you would like to edit. ");
+			while (userEntry > list.size() || userEntry < 1) {
+				System.out.println("Not a valid entry, please select a task number from the list.");
+				System.out.println(" ");
+				listTasks(list, false);
+				userEntry = sc.nextInt();
+			}
+			System.out.println(prompt);
+			String choice = sc.next();
+			if(choice.equalsIgnoreCase("name")) {
+				System.out.println(list.get(userEntry - 1));
+				System.out.println("What you would like to change the name to?");
+				sc.nextLine();
+				String newName = sc.nextLine();
+				list.get(userEntry-1).setMemberName(newName);
+				System.out.println("");
+				System.out.println("");
+				System.out.println("");
+				System.out.println("Name changed.");
+				System.out.println("");
+				System.out.println(list.get(userEntry - 1));
+				
+			}else if(choice.equalsIgnoreCase("date")) {
+				System.out.println(list.get(userEntry - 1));
+				System.out.println("What you would like to change the due date to?");
+				LocalDate date = null;
+				while (date == null) {
+					//System.out.print("Due Date (MM/dd/yyyy): ");
+					String tempDate = sc.next();
+					try {
+						date = LocalDate.parse(tempDate, dateFormat);
+						} catch (DateTimeParseException e) {
+						System.out.println("Sorry, that's not valid. Please try again.");
+						}
+				}
+				list.get(userEntry-1).setFormattedDate(date);
+				System.out.println("");
+				System.out.println("");
+				System.out.println("Date changed!");
+				System.out.println("");
+			}else if(choice.equalsIgnoreCase("description")) {
+				System.out.println(list.get(userEntry - 1));
+				System.out.println("What you would like to change the description to?");
+				// garbage line
+				sc.nextLine();
+				String newDesc = sc.nextLine();
+				list.get(userEntry - 1).setTaskDescript(newDesc);
+				System.out.println("");
+				System.out.println("");
+				System.out.println("Description changed!");
+				System.out.println("");
+			}else {
+				System.out.println("Quitting back to menu...");
+			}
+			
+		}
+
+		
+	}
 
 	public void setTaskComplete() {
 		this.taskComplete = true;
@@ -242,7 +326,13 @@ public class Task {
 	public String toString() {
 		String format = "%-15s %-15s %-15s %-15s \n";
 		String list = "";
-		list = String.format(format, isTaskComplete(), getFormattedDate(), getMemberName(), getTaskDescript());
+		String done = "";
+		if(isTaskComplete()) {
+			done = "Complete";
+		}else {
+			done = "Not Complete";
+		}
+		list = String.format(format, done, getFormattedDate(), getMemberName(), getTaskDescript());
 		return list;
 	}
 
